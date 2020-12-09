@@ -44,6 +44,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             app:inputHint="@string/hint_enter_a_message"
+            app:showAttachmentButton="true"
 
             app:layout_constraintBottom_toBottomOf="parent" />
 

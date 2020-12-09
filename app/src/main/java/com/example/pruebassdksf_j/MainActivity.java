@@ -2,9 +2,11 @@ package com.example.pruebassdksf_j;
 
 import android.app.AlertDialog;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.os.Bundle;
 
 import com.example.pruebassdksf_j.models.ChatMessageWrapper;
+import com.example.pruebassdksf_j.models.MainStatusSaver;
 import com.example.pruebassdksf_j.models.MessageWrapper;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
@@ -13,9 +15,12 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.Button;
+import android.widget.RadioButton;
+import android.widget.RadioGroup;
 import android.widget.TextView;
 
 import com.salesforce.android.chat.core.AgentListener;
@@ -46,138 +51,85 @@ import com.stfalcon.chatkit.messages.MessagesListAdapter;
 
 import java.sql.Date;
 import java.util.Calendar;
+import java.util.zip.Inflater;
 
 public class MainActivity extends AppCompatActivity {
 
-    public static final String ORG_ID = "00D2g0000000O2w";//"00D2g0000008buj";//"00D4R0000007tWz";
-    public static final String DEPLOYMENT_ID = "5722g000000CaZq";//"5722g00000000Wx";//"5724R000000c2nq";
-    public static final String BUTTON_ID = "5732g000000CbV2";//"5732g00000000aS";//"5734R000000c31K";
-    public static final String LIVE_AGENT_POD = "d.la3-c1cs-ph2.salesforceliveagent.com";//"c.la3-c1cs-ph2.salesforceliveagent.com"; //"d.la1-c2-ia4.salesforceliveagent.com";
-    private @Nullable ChatClient mChatClient;
 
+    public MainStatusSaver instance = MainStatusSaver.getInstance();
 
-// CHAT CORE y LISTENERS
-    ChatCore core = ChatCore.configure(new ChatConfiguration.Builder(ORG_ID, BUTTON_ID,
-            DEPLOYMENT_ID, LIVE_AGENT_POD)
-            .build());
-    SessionStateListener myStateListener = new SessionStateListener() {
-        @Override
-        public void onSessionStateChange(ChatSessionState chatSessionState) {
-        }
+    // CHAT CORE y LISTENERS
+    public static String SELECTEDORG = "Santy";
 
-        @Override
-        public void onSessionEnded(ChatEndReason chatEndReason) {
-            endChater();
-        }
-    };
-    AgentListener myAgentListener = new AgentListener() {
-        @Override
-        public void onAgentJoined(AgentInformation agentInformation) {
-            startChater();
-        }
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_main);
+        Toolbar toolbar = findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
 
-        @Override
-        public void onChatTransferred(AgentInformation agentInformation) {
-
-        }
-
-        @Override
-        public void onChatMessageReceived(ChatMessage chatMessage) {
-            adapter.addToStart(new MessageWrapper(
-                    new ChatMessageWrapper(chatMessage.getAgentId(), chatMessage.getAgentName(), chatMessage.getText(), chatMessage.getTimestamp())
-            ), true);
-        }
-
-        @Override
-        public void onAgentIsTyping(boolean b) {
-            TextView tx = findViewById(R.id.writtingTextbox);
-            if(b) {
-                tx.setText("El agente esta escribiendo...");
-            } else {
-                tx.setText("");
+        RadioGroup rG = findViewById(R.id.selectedEnviroment);
+        rG.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(RadioGroup group, int checkedId) {
+                RadioButton rItem = findViewById(checkedId);
+                SELECTEDORG = String.valueOf(rItem.getText());
+                instance.setSELECTEDORG(String.valueOf(rItem.getText()));
+                instance.recompileCore();
             }
-        }
+        });
+        FloatingActionButton fab = findViewById(R.id.fab);
 
-        @Override
-        public void onTransferToButtonInitiated() {
 
-        }
+        // ESTANDAR
+        fab.setOnClickListener(click -> {
+            chat();
+            return;
+        });
 
-        @Override
-        public void onAgentJoinedConference(String s) {
+        FloatingActionButton fab2 = findViewById(R.id.fab2);
+        //CORE + UI CUSTOM
+        fab2.setOnClickListener(click -> {
+            Intent intent = new Intent(this, Chatting.class);
+            startActivity(intent);
+            return;
+        });
 
-        }
+        // */
+    }
 
-        @Override
-        public void onAgentLeftConference(String s) {
 
-        }
-    };
-    QueueListener myQueueListener = new QueueListener() {
-        @Override
-        public void onQueuePositionUpdate(int i) {
 
-        }
-
-        @Override
-        public void onQueueEstimatedWaitTimeUpdate(int i, int i1) {
-
-        }
-    };
-    ChatBotListener myEinsteinBotListener = new ChatBotListener() {
-        @Override
-        public void onChatMenuReceived(ChatWindowMenu chatWindowMenu) {
-
-        }
-
-        @Override
-        public void onChatFooterMenuReceived(ChatFooterMenu chatFooterMenu) {
-
-        }
-
-        @Override
-        public void onChatButtonMenuReceived(ChatWindowButtonMenu chatWindowButtonMenu) {
-
-        }
-    };
 
 
     //DATOS DEL PRE-CHAT PARA UI ESTANDAR
-    ChatUserData userData = new ChatUserData(
-            "Usuario Ualá", "testuser10@uala.com.ar", true);
-    ChatUserData lastName = new ChatUserData(
-            "LastName", "test", false);
-    ChatUserData country = new ChatUserData(
-            "Country", "484", false);
-    ChatUserData recordType = new ChatUserData(
-            "RecordType", "0122g000000A293AAC", false);
-    ChatUserData dType = new ChatUserData(
-            "Tipo de documento", "CURP", false);
-    ChatUserData gender = new ChatUserData(
-            "Genero", "M", false);
-    ChatUserData dId = new ChatUserData(
-            "Numero de documento", "FMFORPLVTDICCQXVHU", false);
-    ChatUserData firstName = new ChatUserData(
-            "Nombre", "Santiago", false);
-    ChatUserData phone = new ChatUserData(
-            "Telefono", "1102255550", false);
-    ChatUserData fNacimiento = new ChatUserData(
-            "Fecha Nacimiento", "2020-10-08T00:00:00.000Z", false);
-    // Map FirstName, LastName, and Email to fields in a Contact record
-    ChatEntity contactEntity = new ChatEntity.Builder()
+    ChatUserData email = new ChatUserData("Email", "testuser11@uala.com.ar", true);
+    ChatUserData country = new ChatUserData("Country", "484", false);
+    ChatUserData appVer = new ChatUserData("APPVersion", "22.012", false);
+    ChatUserData lastName = new ChatUserData("LastName", "test MX", false);
+    ChatUserData recordType = new ChatUserData("RecordType", "0122g000000A293AAC", false);
+    ChatUserData dType = new ChatUserData("Tipo de documento", "CURP", false);
+    ChatUserData gender = new ChatUserData("Genero", "M", false);
+    ChatUserData dId = new ChatUserData("Numero de documento", "AMFORPLVTDICCQXVHU", false);
+    ChatUserData firstName = new ChatUserData("Nombre", "Santiago", false);
+    ChatUserData phone = new ChatUserData("Telefono", "1102255550", false);
+    ChatUserData fNacimiento = new ChatUserData("Fecha Nacimiento", "2020-10-08T00:00:00.000Z", false);
+//PRECHAT
+    //  Map FirstName, LastName, and Email to fields in a Contact record
+    ChatEntity accountEntity = new ChatEntity.Builder()
             .showOnCreate(true)
             .linkToTranscriptField("Account")
-            .addChatEntityField(
-                    new ChatEntityField.Builder()
-                            .doFind(true)
-                            .isExactMatch(true)
-                            .doCreate(true)
-                            .build("PersonEmail", userData))
-            .addChatEntityField(
-                    new ChatEntityField.Builder()
-                            .doFind(false)
-                            .doCreate(true)
-                            .build("LastName", lastName))
+            .addChatEntityField(new ChatEntityField.Builder()
+                    .doFind(true)
+                    .isExactMatch(true)
+                    .doCreate(true)
+                    .build("PersonEmail", email)
+            )
+            .addChatEntityField(new ChatEntityField.Builder()
+                    .doFind(false)
+                    .doCreate(true)
+                    .build("LastName", lastName)
+            )
             .addChatEntityField(
                     new ChatEntityField.Builder()
                             .doFind(true)
@@ -223,147 +175,53 @@ public class MainActivity extends AppCompatActivity {
                             .doCreate(true)
                             .build("PersonMobilePhone", phone)
             )
-            .addChatEntityField(
-                    new ChatEntityField.Builder()
-                            .doCreate(true)
-                            .doFind(true)
-                            .isExactMatch(true)
-                            .build("AWSCreatedDate__c", fNacimiento)
-            )
             .build("Account");
 
-    // CONFIGURACION DE CHAT
-    ChatConfiguration chatConfiguration =
-            new ChatConfiguration.Builder(ORG_ID, BUTTON_ID,
-                    DEPLOYMENT_ID, LIVE_AGENT_POD)
-                    .chatUserData(
-                            userData,
-                            lastName,
-                            country,
-                            recordType,
-                            dType,
-                            dId,
-                            gender,
-                            firstName,
-                            phone,
-                            fNacimiento
-                    )
-                    .chatEntities(contactEntity)
-                    .build();
-
-    public MessagesListAdapter<MessageWrapper> adapter;
-
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
-        Toolbar toolbar = findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
-
-        FloatingActionButton fab = findViewById(R.id.fab);
-
-        /* ESTANDAR
-        fab.setOnClickListener(click -> {
-            chat();
-            return;
-        });
-        */
-        //CORE + UI CUSTOM
-        fab.setOnClickListener(click -> {
-                startChat();
-                return;
-            });
-    }
-
+//
     public void chat () {
         //UI ESTANDAR
-        
-        ChatUI.configure(ChatUIConfiguration.create(chatConfiguration))
-                .createClient(getApplicationContext())
-                .onResult(new Async.ResultHandler<ChatUIClient>() {
-                    @Override public void handleResult (Async<?> operation,
-                                                        ChatUIClient chatUIClient) {
-                        chatUIClient.startChatSession(MainActivity.this);
-                    }
-                });
-    }
+        Log.e("SelectedOrg1", SELECTEDORG);
+        final String ORG_ID = (SELECTEDORG == "Santy" ? "00D4R0000007tWz" :
+                (SELECTEDORG == "UALAUAT" ? "00D2g0000008buj" : "00D2g0000000O2w" ) );
+        final String DEPLOYMENT_ID = (SELECTEDORG == "Santy" ?  "5724R000000c2nq" :
+                (SELECTEDORG == "UALAUAT" ? "5722g00000000Wx" : "5722g000000CaZq" ) );
+        final String BUTTON_ID = (SELECTEDORG == "Santy" ?  "5734R000000c3JX" :
+                (SELECTEDORG == "UALAUAT" ? "5732g00000000aS" : "5732g000000CbV2" ) );
+        final String LIVE_AGENT_POD = (SELECTEDORG == "Santy" ? "d.la1-c2-ia4.salesforceliveagent.com" :
+                (SELECTEDORG == "UALAUAT" ? "d.la3-c1cs-ph2.salesforceliveagent.com" :
+                        "d.la3-c1cs-ph2.salesforceliveagent.com" ) );
+        //CONFIGURACION DE CHAT
+        ChatConfiguration chatConfiguration =
+                new ChatConfiguration.Builder(ORG_ID, BUTTON_ID,
+                        DEPLOYMENT_ID, LIVE_AGENT_POD)
+                        .chatUserData(
+                                email,
+                                appVer,
+                                lastName,
+                                country,
+                                recordType,
+                                dType,
+                                dId,
+                                gender,
+                                firstName,
+                                phone
+                        )
+                        .chatEntities(accountEntity)
 
+                        .build();
+        ChatUIConfiguration uiConfig = new ChatUIConfiguration.Builder()
+                .chatConfiguration(chatConfiguration)// Use estimated wait time
+                .defaultToMinimized(false)                // Start in full-screen mode
+                .build();
+        ChatUI.configure(uiConfig)
 
-    public void startChater() {
-        // UI CUSTOM
-        setContentView(R.layout.messager);
+            .createClient(getApplicationContext())
 
-        MessageInput inputView = findViewById(R.id.input);
-        MessagesList messagesList = findViewById(R.id.messagesList);
-        String senderId = "xd";
-        adapter = new MessagesListAdapter<>(senderId, null);
-        messagesList.setAdapter(adapter);
-
-        inputView.setTypingListener(new MessageInput.TypingListener() {
-            @Override
-            public void onStartTyping() {
-                mChatClient.setIsUserTyping(true);
-            }
-
-            @Override
-            public void onStopTyping() {
-                mChatClient.setIsUserTyping(false);
-            }
+            .onResult(new Async.ResultHandler<ChatUIClient>() {
+                @Override public void handleResult (Async<?> operation,
+                                                    ChatUIClient chatUIClient) {
+                    chatUIClient.startChatSession(MainActivity.this);
+                }
         });
-        inputView.setInputListener( input -> {
-            mChatClient.sendChatMessage(input.toString());
-            adapter.addToStart(new MessageWrapper(new ChatMessageWrapper("xd", "Visitor", input.toString(), Calendar.getInstance().getTime())), true);
-            return true;
-        });
-
-        Button btnClose = findViewById(R.id.closeChat);
-        btnClose.setOnClickListener(click -> {
-            mChatClient.endChatSession();
-            return;
-        });
-    }
-
-    public void endChater () {
-        setContentView(R.layout.activity_main);
-    }
-
-
-    public void startChat() {
-        // UI CUSTOM
-        setContentView(R.layout.loading_screen);
-        core.createClient(this)
-                .onResult(new Async.ResultHandler<ChatClient>() {
-                    @Override
-                    public void handleResult(Async<?> operation,
-                                             @NonNull ChatClient chatClient) {
-                        mChatClient = chatClient
-                                .addSessionStateListener(myStateListener)
-                                .addAgentListener(myAgentListener)
-                                .addQueueListener(myQueueListener)
-                                .addChatBotListener(myEinsteinBotListener);
-                    }
-                });
-    };
-
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.menu_main, menu);
-        return true;
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
-        int id = item.getItemId();
-
-        //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
-            return true;
-        }
-
-        return super.onOptionsItemSelected(item);
     }
 }
