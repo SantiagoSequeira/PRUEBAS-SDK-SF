@@ -11,12 +11,12 @@ import com.stfalcon.chatkit.messages.MessagesListAdapter;
 
 public class MainStatusSaver {
     private static MainStatusSaver instance = null;
-    private static String SELECTEDORG = "Santy";
 
 
     public ChatCore chatCore;
     public ChatClient chatClient;
     public MessagesListAdapter<MessageWrapper> adapter;
+    public String SELECTEDORG;
 
     protected MainStatusSaver() {
         // Exists only to defeat instantiation.
@@ -39,7 +39,6 @@ public class MainStatusSaver {
         String LIVE_AGENT_POD = (SELECTEDORG == "Santy" ? "d.la1-c2-ia4.salesforceliveagent.com" :
                 (SELECTEDORG == "UALAUAT" ? "d.la3-c1cs-ph2.salesforceliveagent.com" :
                         "d.la3-c1cs-ph2.salesforceliveagent.com" ) );
-        Log.e("SelectedOrg", SELECTEDORG);
         chatCore = ChatCore.configure(new ChatConfiguration.Builder(ORG_ID, BUTTON_ID, DEPLOYMENT_ID, LIVE_AGENT_POD).build());
     }
 
@@ -55,7 +54,7 @@ public class MainStatusSaver {
         this.adapter = adapter;
     }
 
-    public static void setSELECTEDORG(String SELECTEDORG) {
-        MainStatusSaver.SELECTEDORG = SELECTEDORG;
+    public void setSELECTEDORG(String SELECTEDORG) {
+        this.SELECTEDORG = SELECTEDORG;
     }
 }

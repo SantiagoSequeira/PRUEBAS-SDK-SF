@@ -59,7 +59,7 @@ public class MainActivity extends AppCompatActivity {
     public MainStatusSaver instance = MainStatusSaver.getInstance();
 
     // CHAT CORE y LISTENERS
-    public static String SELECTEDORG = "Santy";
+    public String sOrg = "Santy";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -73,7 +73,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onCheckedChanged(RadioGroup group, int checkedId) {
                 RadioButton rItem = findViewById(checkedId);
-                SELECTEDORG = String.valueOf(rItem.getText());
+                sOrg = rItem.getText().toString();
                 instance.setSELECTEDORG(String.valueOf(rItem.getText()));
                 instance.recompileCore();
             }
@@ -83,7 +83,7 @@ public class MainActivity extends AppCompatActivity {
 
         // ESTANDAR
         fab.setOnClickListener(click -> {
-            chat();
+            chat(sOrg);
             return;
         });
 
@@ -104,7 +104,8 @@ public class MainActivity extends AppCompatActivity {
 
     //DATOS DEL PRE-CHAT PARA UI ESTANDAR
     ChatUserData email = new ChatUserData("Email", "testuser11@uala.com.ar", true);
-    ChatUserData country = new ChatUserData("Country", "484", false);
+    ChatUserData username = new ChatUserData("UalaUsername", "virtual802_1600178162", true);
+    ChatUserData country = new ChatUserData("Country", "032", false);
     ChatUserData appVer = new ChatUserData("APPVersion", "22.012", false);
     ChatUserData lastName = new ChatUserData("LastName", "test MX", false);
     ChatUserData recordType = new ChatUserData("RecordType", "0122g000000A293AAC", false);
@@ -114,7 +115,8 @@ public class MainActivity extends AppCompatActivity {
     ChatUserData firstName = new ChatUserData("Nombre", "Santiago", false);
     ChatUserData phone = new ChatUserData("Telefono", "1102255550", false);
     ChatUserData fNacimiento = new ChatUserData("Fecha Nacimiento", "2020-10-08T00:00:00.000Z", false);
-//PRECHAT
+
+    //PRECHAT
     //  Map FirstName, LastName, and Email to fields in a Contact record
     ChatEntity accountEntity = new ChatEntity.Builder()
             .showOnCreate(true)
@@ -123,91 +125,59 @@ public class MainActivity extends AppCompatActivity {
                     .doFind(true)
                     .isExactMatch(true)
                     .doCreate(true)
-                    .build("PersonEmail", email)
-            )
-            .addChatEntityField(new ChatEntityField.Builder()
-                    .doFind(false)
-                    .doCreate(true)
-                    .build("LastName", lastName)
-            )
-            .addChatEntityField(
-                    new ChatEntityField.Builder()
-                            .doFind(true)
-                            .isExactMatch(true)
-                            .doCreate(true)
-                            .build("RecordTypeId", recordType))
-            .addChatEntityField(
-                    new ChatEntityField.Builder()
-                            .doFind(true)
-                            .isExactMatch(true)
-                            .doCreate(true)
-                            .build("Country__c", country))
-            .addChatEntityField(
-                    new ChatEntityField.Builder()
-                            .doFind(false)
-                            .isExactMatch(false)
-                            .doCreate(true)
-                            .build("DocumentType__c", dType))
-            .addChatEntityField(
-                    new ChatEntityField.Builder()
-                            .doFind(false)
-                            .isExactMatch(false)
-                            .doCreate(true)
-                            .build("Gender__c", gender))
-            .addChatEntityField(
-                    new ChatEntityField.Builder()
-                            .doFind(false)
-                            .isExactMatch(false)
-                            .doCreate(true)
-                            .build("DocumentId__c", dId)
+                    .build("UalaUsername__c", username)
             )
             .addChatEntityField(
                     new ChatEntityField.Builder()
                             .doFind(false)
                             .isExactMatch(false)
                             .doCreate(true)
-                            .build("FirstName", firstName)
-            )
-            .addChatEntityField(
-                    new ChatEntityField.Builder()
-                            .doFind(false)
-                            .isExactMatch(false)
-                            .doCreate(true)
-                            .build("PersonMobilePhone", phone)
+                            .build("Country__c", country)
             )
             .build("Account");
 
 //
-    public void chat () {
+    public void chat (String sOrg) {
         //UI ESTANDAR
-        Log.e("SelectedOrg1", SELECTEDORG);
-        final String ORG_ID = (SELECTEDORG == "Santy" ? "00D4R0000007tWz" :
-                (SELECTEDORG == "UALAUAT" ? "00D2g0000008buj" : "00D2g0000000O2w" ) );
-        final String DEPLOYMENT_ID = (SELECTEDORG == "Santy" ?  "5724R000000c2nq" :
-                (SELECTEDORG == "UALAUAT" ? "5722g00000000Wx" : "5722g000000CaZq" ) );
-        final String BUTTON_ID = (SELECTEDORG == "Santy" ?  "5734R000000c3JX" :
-                (SELECTEDORG == "UALAUAT" ? "5732g00000000aS" : "5732g000000CbV2" ) );
-        final String LIVE_AGENT_POD = (SELECTEDORG == "Santy" ? "d.la1-c2-ia4.salesforceliveagent.com" :
-                (SELECTEDORG == "UALAUAT" ? "d.la3-c1cs-ph2.salesforceliveagent.com" :
-                        "d.la3-c1cs-ph2.salesforceliveagent.com" ) );
+        Log.e("UALADEV", String.valueOf(sOrg == "UALADEV"));
+        String DEPLOYMENT_ID = "";
+        String ORG_ID = "";
+        String BUTTON_ID = "";
+        String LIVE_AGENT_POD = "";
+
+        switch (sOrg) {
+            case "Santy":
+                ORG_ID = "00D4R0000007tWz";
+                DEPLOYMENT_ID = "5724R000000c2nq";
+                BUTTON_ID = "5734R000000c3JX";
+                LIVE_AGENT_POD = "d.la1-c2-ia4.salesforceliveagent.com";
+                break;
+            case "UALAUAT":
+                ORG_ID = "00D2g0000008buj";
+                DEPLOYMENT_ID = "5722g00000000Ws";
+                BUTTON_ID = "5732g00000000ZU";
+                LIVE_AGENT_POD = "d.la3-c1cs-ph2.salesforceliveagent.com";
+                break;
+            case "UALADEV":
+                ORG_ID = "00D2g0000000O2w";
+                DEPLOYMENT_ID = "5722g000000CaZq";
+                BUTTON_ID = "5732g000000CbRK";
+                LIVE_AGENT_POD = "d.la3-c1cs-ph2.salesforceliveagent.com";
+                break;
+        }
+        Log.e("Santy", String.valueOf(sOrg == "Santy"));
+        Log.e("SelectedOrg2", sOrg );
+        Log.e("ORG_ID", ORG_ID);
+        Log.e("DEPLOYMENT_ID", DEPLOYMENT_ID);
+        Log.e("BUTTON_ID", BUTTON_ID);
+        Log.e("LIVE_AGENT_POD", LIVE_AGENT_POD);
+
         //CONFIGURACION DE CHAT
         ChatConfiguration chatConfiguration =
                 new ChatConfiguration.Builder(ORG_ID, BUTTON_ID,
                         DEPLOYMENT_ID, LIVE_AGENT_POD)
-                        .chatUserData(
-                                email,
-                                appVer,
-                                lastName,
-                                country,
-                                recordType,
-                                dType,
-                                dId,
-                                gender,
-                                firstName,
-                                phone
-                        )
+                        .chatUserData(country, username)
                         .chatEntities(accountEntity)
-
                         .build();
         ChatUIConfiguration uiConfig = new ChatUIConfiguration.Builder()
                 .chatConfiguration(chatConfiguration)// Use estimated wait time
