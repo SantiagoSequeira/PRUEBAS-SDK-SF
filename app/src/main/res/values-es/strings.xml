@@ -1,8 +1,8 @@
 <resources>
     <string name="chat_fullscreen_connecting_error_title">TEST</string>
     <string name="chat_resume_error_string">CHAT</string>
-    <string name="chat_file_transfer_requested"></string>
-    <string name="chat_file_transfer_canceled"></string>
+    <string name="chat_file_transfer_requested">REQUESTED</string>
+    <string name="chat_file_transfer_canceled">CANCELED</string>
     <string name="pre_chat_toolbar_title">UALÁ</string>
     <string name="chat_toolbar_title">UALÁ</string>
 

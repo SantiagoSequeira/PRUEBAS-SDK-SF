@@ -3,6 +3,7 @@ package com.example.pruebassdksf_j;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 
 import com.example.pruebassdksf_j.models.ChatMessageWrapper;
@@ -28,7 +29,10 @@ import com.salesforce.android.chat.core.ChatBotListener;
 import com.salesforce.android.chat.core.ChatClient;
 import com.salesforce.android.chat.core.ChatConfiguration;
 import com.salesforce.android.chat.core.ChatCore;
+import com.salesforce.android.chat.core.FileTransferAssistant;
+import com.salesforce.android.chat.core.FileTransferRequestListener;
 import com.salesforce.android.chat.core.QueueListener;
+import com.salesforce.android.chat.core.SessionInfoListener;
 import com.salesforce.android.chat.core.SessionStateListener;
 import com.salesforce.android.chat.core.model.AgentInformation;
 import com.salesforce.android.chat.core.model.ChatEndReason;
@@ -36,13 +40,17 @@ import com.salesforce.android.chat.core.model.ChatEntity;
 import com.salesforce.android.chat.core.model.ChatEntityField;
 import com.salesforce.android.chat.core.model.ChatFooterMenu;
 import com.salesforce.android.chat.core.model.ChatMessage;
+import com.salesforce.android.chat.core.model.ChatSessionInfo;
 import com.salesforce.android.chat.core.model.ChatSessionState;
 import com.salesforce.android.chat.core.model.ChatUserData;
 import com.salesforce.android.chat.core.model.ChatWindowButtonMenu;
 import com.salesforce.android.chat.core.model.ChatWindowMenu;
+import com.salesforce.android.chat.core.model.FileTransferStatus;
+import com.salesforce.android.chat.ui.ChatEventListener;
 import com.salesforce.android.chat.ui.ChatUI;
 import com.salesforce.android.chat.ui.ChatUIClient;
 import com.salesforce.android.chat.ui.ChatUIConfiguration;
+import com.salesforce.android.chat.ui.PreChatUIListener;
 import com.salesforce.android.chat.ui.model.PreChatTextInputField;
 import com.salesforce.android.service.common.utilities.control.Async;
 import com.stfalcon.chatkit.messages.MessageInput;
@@ -98,15 +106,12 @@ public class MainActivity extends AppCompatActivity {
         // */
     }
 
-
-
-
-
     //DATOS DEL PRE-CHAT PARA UI ESTANDAR
     ChatUserData email = new ChatUserData("Email", "testuser11@uala.com.ar", true);
     ChatUserData username = new ChatUserData("UalaUsername", "virtual802_1600178162", true);
     ChatUserData country = new ChatUserData("Country", "032", false);
-    ChatUserData appVer = new ChatUserData("APPVersion", "22.012", false);
+    ChatUserData appVer = new ChatUserData("AppVersionFromApp__c", "VAR", false,"AppVersionFromApp__c");
+    ChatUserData osVer = new ChatUserData("OSVersionFromApp__c", "VAR", false, "OSVersionFromApp__c");
     ChatUserData lastName = new ChatUserData("LastName", "test MX", false);
     ChatUserData recordType = new ChatUserData("RecordType", "0122g000000A293AAC", false);
     ChatUserData dType = new ChatUserData("Tipo de documento", "CURP", false);
@@ -135,7 +140,6 @@ public class MainActivity extends AppCompatActivity {
                             .build("Country__c", country)
             )
             .build("Account");
-
 //
     public void chat (String sOrg) {
         //UI ESTANDAR
@@ -146,6 +150,12 @@ public class MainActivity extends AppCompatActivity {
         String LIVE_AGENT_POD = "";
 
         switch (sOrg) {
+            /*case "Santy":
+                ORG_ID = "00D0b000000uJ2G";
+                DEPLOYMENT_ID = "5720b000000Y1ed";
+                BUTTON_ID = "5730b000000Y1jk";
+                LIVE_AGENT_POD = "d.la3-c2-ia4.salesforceliveagent.com";
+                break;*/
             case "Santy":
                 ORG_ID = "00D4R0000007tWz";
                 DEPLOYMENT_ID = "5724R000000c2nq";
@@ -164,6 +174,12 @@ public class MainActivity extends AppCompatActivity {
                 BUTTON_ID = "5732g000000CbRK";
                 LIVE_AGENT_POD = "d.la3-c1cs-ph2.salesforceliveagent.com";
                 break;
+            case "UALADEVCOL":
+                ORG_ID = "00D2g0000000O2w";
+                DEPLOYMENT_ID = "5722g000000CaZq";
+                BUTTON_ID = "5732g000000CbWo";
+                LIVE_AGENT_POD = "d.la3-c1cs-ph2.salesforceliveagent.com";
+                break;
         }
         Log.e("Santy", String.valueOf(sOrg == "Santy"));
         Log.e("SelectedOrg2", sOrg );
@@ -171,27 +187,52 @@ public class MainActivity extends AppCompatActivity {
         Log.e("DEPLOYMENT_ID", DEPLOYMENT_ID);
         Log.e("BUTTON_ID", BUTTON_ID);
         Log.e("LIVE_AGENT_POD", LIVE_AGENT_POD);
-
         //CONFIGURACION DE CHAT
+
+        SessionStateListener sessionStateListener = new SessionStateListener() {
+            @Override
+            public void onSessionStateChange(ChatSessionState chatSessionState) {
+
+            }
+
+            @Override
+            public void onSessionEnded(ChatEndReason chatEndReason) {
+
+            }
+        };
+
+        SessionInfoListener sessionInfoListener = new SessionInfoListener() {
+            @Override
+            public void onSessionInfoReceived(ChatSessionInfo chatSessionInfo) {
+
+            }
+        };
+
+
+
+
+
+
         ChatConfiguration chatConfiguration =
                 new ChatConfiguration.Builder(ORG_ID, BUTTON_ID,
                         DEPLOYMENT_ID, LIVE_AGENT_POD)
-                        .chatUserData(country, username)
+                        .chatUserData(country, username, appVer, osVer)
                         .chatEntities(accountEntity)
                         .build();
         ChatUIConfiguration uiConfig = new ChatUIConfiguration.Builder()
                 .chatConfiguration(chatConfiguration)// Use estimated wait time
-                .defaultToMinimized(false)                // Start in full-screen mode
+                .defaultToMinimized(false)
+                .disablePreChatView(true)
                 .build();
         ChatUI.configure(uiConfig)
-
             .createClient(getApplicationContext())
-
             .onResult(new Async.ResultHandler<ChatUIClient>() {
                 @Override public void handleResult (Async<?> operation,
                                                     ChatUIClient chatUIClient) {
+
                     chatUIClient.startChatSession(MainActivity.this);
                 }
         });
+
     }
 }
