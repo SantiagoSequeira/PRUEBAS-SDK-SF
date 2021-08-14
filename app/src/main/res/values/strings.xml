@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">PRUEBASSDKSF-J</string>
+    <string name="app_name">SalesforceChatTesting</string>
     <string name="action_settings">Settings</string>
     <!-- Strings used for fragments for navigation -->
     <string name="first_fragment_label">First Fragment</string>
@@ -11,4 +11,14 @@
     <string name="hint_enter_a_message">Message</string>
     <string name="channel_name">test</string>
     <string name="channel_description">test</string>
+    <string name="agent_pod">AgentPod:</string>
+    <string name="saveButton">Save</string>
+    <string name="showToAgentTV">Show to agent:</string>
+    <string name="doFindTV">Do find:</string>
+    <string name="agentLabelTV">Agent label:</string>
+    <string name="transcriptFieldNamesTV">Transcript field name:</string>
+    <string name="userItemDataValueTV">Value:</string>
+    <string name="objectFieldNameTV">Object field name:</string>
+    <string name="isExactMatchTV">Exact match:</string>
+    <string name="doCreateTV">Do create:</string>
 </resources>

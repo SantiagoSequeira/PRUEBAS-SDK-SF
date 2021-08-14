@@ -1,4 +1,4 @@
-package com.example.pruebassdksf_j;
+package com.example.SalesforceChatTester;
 
 import org.junit.Test;
 
